@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
-use Webmozart\Assert\Assert;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ApiResource(
@@ -36,7 +37,7 @@ class User
 
     /**
      * @Assert\NotBlank(message="Le prénom est requis", groups={"postValidation", "putValidation"})
-     * @Assert\Regex("/^[a-zA-Z\u00C0-\u00FF'-\s]+$/", message="Le prénom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation"})
+     * @Assert\Regex(pattern="/^[a-zA-Z\u00C0-\u00FF' -]+$/", message="Le prénom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation"})
      * @Assert\Length(
      *      min = 2,
      *      max = 40,
@@ -51,7 +52,7 @@ class User
 
     /**
      * @Assert\NotBlank(message="Le nom est requis", groups={"postValidation", "putValidation"})
-     * @Assert\Regex("/^[a-zA-Z\u00C0-\u00FF'-\s]+$/", message="Le nom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation"})
+     * @Assert\Regex(pattern="/^[a-zA-Z\u00C0-\u00FF' -]+$/", message="Le nom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation"})
      * @Assert\Length(
      *      min = 2,
      *      max = 40,
@@ -80,6 +81,15 @@ class User
     private $email;
 
     /**
+     * @Assert\NotBlank(message="Le mot de passe requis", groups={"postValidation", "putValidation"})
+     * @Assert\Length(
+     *      min = 8,
+     *      max = 60,
+     *      minMessage = "Le mot de passe doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le mot de passe doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation"}
+     * )
      * @ORM\Column(type="string", length=60)
      */
     private $password;
