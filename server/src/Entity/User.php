@@ -4,13 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\SerializedName;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -25,11 +28,16 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *         "put"={"validation_groups"={"Default", "putValidation"}}
  *     },
  *     normalizationContext={"groups"={"user:read"}},
- *     denormalizationContext={"groups"={"user:write"}}
+ *     denormalizationContext={"groups"={"user:write"}},
+ *     attributes={
+ *         "pagination_items_per_page"=1
+ *     }
  * )
  * @UniqueEntity("email", message="Un compte associé à cette adresse email existe déjà", groups={"postValidation", "putValidation"})
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\Table(name="`user`")
+ * @ApiFilter(SearchFilter::class, properties={"firstname": "ipartial", "lastname": "ipartial", "email": "ipartial"})
+ * @ApiFilter(PropertyFilter::class)
  */
 class User implements UserInterface
 {
@@ -91,7 +99,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="json")
-     * @Groups({"user:read", "user:write"})
+     * @Groups({"user:read", "admin:write"})
      */
     private $roles = [];
 
@@ -112,7 +120,7 @@ class User implements UserInterface
      *      allowEmptyString = false,
      *      groups={"postValidation", "putValidation"}
      * )
-     * @Groups({"user:write"})
+     * @Groups("user:write")
      * @SerializedName("password")
      */
     private $plainPassword;
@@ -125,11 +133,13 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Student::class, mappedBy="user_id")
+     * @Groups("user:read")
      */
     private $student;
 
     /**
      * @ORM\OneToMany(targetEntity=Sheet::class, mappedBy="user_id")
+     * @Groups("user:read")
      */
     private $sheet;
 
