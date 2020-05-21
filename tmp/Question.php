@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\QuestionRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\QuestionRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
@@ -56,9 +56,9 @@ class Question
 
     /**
      * @ORM\ManyToOne(targetEntity=Sheet::class, inversedBy="question")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="sheet_id", nullable=false)
      */
-    private $sheet;
+    private $sheet_id;
 
     public function getId(): ?int
     {
@@ -149,14 +149,14 @@ class Question
         return $this;
     }
 
-    public function getSheet(): ?Sheet
+    public function getSheetId(): ?Sheet
     {
-        return $this->sheet;
+        return $this->sheet_id;
     }
 
-    public function setSheet(?Sheet $sheet): self
+    public function setSheetId(?Sheet $sheet_id): self
     {
-        $this->sheet = $sheet;
+        $this->sheet_id = $sheet_id;
 
         return $this;
     }

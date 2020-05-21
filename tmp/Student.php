@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\StudentRepository;
-use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\StudentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
@@ -37,19 +37,19 @@ class Student
     private $difficulty;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Avatar::class, inversedBy="student")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $avatar;
-
-    /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="student")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="user_id", nullable=false)
      */
     private $user_id;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Sheet::class, inversedBy="students")
+     * @ORM\ManyToOne(targetEntity=Avatar::class, inversedBy="student")
+     * @ORM\JoinColumn(name="avatar_id", nullable=false)
+     */
+    private $avatar_id;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Sheet::class, mappedBy="student")
      */
     private $sheets;
 
@@ -99,18 +99,6 @@ class Student
         return $this;
     }
 
-    public function getAvatar(): ?Avatar
-    {
-        return $this->avatar;
-    }
-
-    public function setAvatar(?Avatar $avatar): self
-    {
-        $this->avatar = $avatar;
-
-        return $this;
-    }
-
     public function getUserId(): ?User
     {
         return $this->user_id;
@@ -119,6 +107,18 @@ class Student
     public function setUserId(?User $user_id): self
     {
         $this->user_id = $user_id;
+
+        return $this;
+    }
+
+    public function getAvatarId(): ?Avatar
+    {
+        return $this->avatar_id;
+    }
+
+    public function setAvatarId(?Avatar $avatar_id): self
+    {
+        $this->avatar_id = $avatar_id;
 
         return $this;
     }
@@ -135,6 +135,7 @@ class Student
     {
         if (!$this->sheets->contains($sheet)) {
             $this->sheets[] = $sheet;
+            $sheet->addStudent($this);
         }
 
         return $this;
@@ -144,6 +145,7 @@ class Student
     {
         if ($this->sheets->contains($sheet)) {
             $this->sheets->removeElement($sheet);
+            $sheet->removeStudent($this);
         }
 
         return $this;

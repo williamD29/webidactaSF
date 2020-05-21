@@ -2,32 +2,30 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\GroupRepository;
+use App\Repository\SeriesRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
- * @ORM\Entity(repositoryClass=GroupRepository::class)
- * @ORM\Table(name="`group`")
+ * @ORM\Entity(repositoryClass=SeriesRepository::class)
  */
-class Group
+class Series
 {
     /**
      * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="NONE")
      * @ORM\Column(type="integer")
      */
-    private $group_number;
+    private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity=Sheet::class, mappedBy="group_number")
+     * @ORM\OneToMany(targetEntity=Sheet::class, mappedBy="series")
      */
     private $sheet;
 
     /**
-     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="group_number")
+     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="series")
      */
     private $result;
 
@@ -37,16 +35,9 @@ class Group
         $this->result = new ArrayCollection();
     }
 
-    public function getGroupNumber(): ?int
+    public function getId(): ?int
     {
-        return $this->group_number;
-    }
-
-    public function setGroupNumber(int $group_number): self
-    {
-        $this->group_number = $group_number;
-
-        return $this;
+        return $this->id;
     }
 
     /**
@@ -61,7 +52,7 @@ class Group
     {
         if (!$this->sheet->contains($sheet)) {
             $this->sheet[] = $sheet;
-            $sheet->setGroupNumber($this);
+            $sheet->setSeries($this);
         }
 
         return $this;
@@ -72,8 +63,8 @@ class Group
         if ($this->sheet->contains($sheet)) {
             $this->sheet->removeElement($sheet);
             // set the owning side to null (unless already changed)
-            if ($sheet->getGroupNumber() === $this) {
-                $sheet->setGroupNumber(null);
+            if ($sheet->getSeries() === $this) {
+                $sheet->setSeries(null);
             }
         }
 
@@ -92,7 +83,7 @@ class Group
     {
         if (!$this->result->contains($result)) {
             $this->result[] = $result;
-            $result->setGroupNumber($this);
+            $result->setSeries($this);
         }
 
         return $this;
@@ -103,8 +94,8 @@ class Group
         if ($this->result->contains($result)) {
             $this->result->removeElement($result);
             // set the owning side to null (unless already changed)
-            if ($result->getGroupNumber() === $this) {
-                $result->setGroupNumber(null);
+            if ($result->getSeries() === $this) {
+                $result->setSeries(null);
             }
         }
 

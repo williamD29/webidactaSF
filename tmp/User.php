@@ -10,6 +10,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
@@ -45,11 +46,53 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"admin:read"})
+     * @Groups({"user:read"})
      */
     private $id;
 
     /**
+     * @Assert\NotBlank(message="Le prénom est requis", groups={"postValidation", "putValidation"})
+     * @Assert\Regex(pattern="/^[a-zA-Z\u00C0-\u00FF' -]+$/", message="Le prénom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation"})
+     * @Assert\Length(
+     *      min = 2,
+     *      max = 40,
+     *      minMessage = "Le prénom doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le prénom doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation"}
+     * )
+     * @ORM\Column(type="string", length=40)
+     * @Groups({"user:read", "user:write"})
+     */
+    private $firstname;
+
+    /**
+     * @Assert\NotBlank(message="Le nom est requis", groups={"postValidation", "putValidation"})
+     * @Assert\Regex(pattern="/^[a-zA-Z\u00C0-\u00FF' -]+$/", message="Le nom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation"})
+     * @Assert\Length(
+     *      min = 2,
+     *      max = 40,
+     *      minMessage = "Le nom doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le nom doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation"}
+     * )
+     * @ORM\Column(type="string", length=40)
+     * @Groups({"user:read", "user:write"})
+     */
+    private $lastname;
+
+    /**
+     * @Assert\NotBlank(message="L'adresse email est requise", groups={"postValidation", "putValidation"})
+     * @Assert\Email(message="L'adresse email n'est pas valide", mode="html5", normalizer="trim", groups={"postValidation", "putValidation"})
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 255,
+     *      minMessage = "L'adresse email doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "L'adresse email doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation"}
+     * )
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user:read", "user:write"})
      */
@@ -57,19 +100,29 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="json")
-     * @Groups({"admin:read", "admin:write"})
+     * @Groups({"user:read", "admin:write"})
      */
     private $roles = [];
 
     /**
      * @var string The hashed password
+     * 
      * @ORM\Column(type="string")
      */
     private $password;
 
     /**
+     * @Assert\NotBlank(message="Le mot de passe requis", groups={"postValidation", "putValidation"})
+     * @Assert\Length(
+     *      min = 8,
+     *      max = 60,
+     *      minMessage = "Le mot de passe doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le mot de passe doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation"}
+     * )
+     * @Groups("user:write")
      * @SerializedName("password")
-     * @Groups({"user:write"})
      */
     private $plainPassword;
 
@@ -81,37 +134,19 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Student::class, mappedBy="user_id")
-     * @Groups({"admin:read", "admin:write"})
+     * @Groups("user:read")
      */
     private $student;
 
     /**
      * @ORM\OneToMany(targetEntity=Sheet::class, mappedBy="user_id")
-     * @Groups({"admin:read", "admin:write"})
+     * @Groups("user:read")
      */
     private $sheet;
-
-    public function __construct()
-    {
-        $this->student = new ArrayCollection();
-        $this->sheet = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
     }
 
     public function getFirstname(): ?string
@@ -134,6 +169,18 @@ class User implements UserInterface
     public function setLastname(string $lastname): self
     {
         $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
 
         return $this;
     }
@@ -182,6 +229,8 @@ class User implements UserInterface
         return $this;
     }
 
+
+
     public function getPlainPassword(): string
     {
         return (string) $this->plainPassword;
@@ -194,31 +243,14 @@ class User implements UserInterface
         return $this;
     }
 
-
-
-    /**
-     * @see UserInterface
-     */
-    public function getSalt()
-    {
-        // not needed when using the "bcrypt" algorithm in security.yaml
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials()
-    {
-        // If you store any temporary, sensitive data on the user, clear it here
-        $this->plainPassword = null;
-    }
+    
 
     public function getProfilePicture(): ?string
     {
         return $this->profile_picture;
     }
 
-    public function setProfilePicture(string $profile_picture): self
+    public function setProfilePicture(?string $profile_picture): self
     {
         $this->profile_picture = $profile_picture;
 
@@ -285,5 +317,22 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getSalt()
+    {
+        // not needed when using the "bcrypt" algorithm in security.yaml
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        $this->plainPassword = null;
     }
 }

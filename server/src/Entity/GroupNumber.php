@@ -2,31 +2,32 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\SeriesRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\GroupNumberRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=SeriesRepository::class)
+ * @ORM\Entity(repositoryClass=GroupNumberRepository::class)
  */
-class Series
+class GroupNumber
 {
     /**
      * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="NONE")
      * @ORM\Column(type="integer")
      */
-    private $series_number;
+    private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity=Sheet::class, mappedBy="series_number")
+     * @ORM\OneToMany(targetEntity=Sheet::class, mappedBy="groupNumber")
      */
     private $sheet;
 
     /**
-     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="series_number")
+     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="groupNumber")
      */
     private $result;
 
@@ -36,14 +37,14 @@ class Series
         $this->result = new ArrayCollection();
     }
 
-    public function getSeriesNumber(): ?int
+    public function getId(): ?int
     {
-        return $this->series_number;
+        return $this->id;
     }
 
-    public function setSeriesNumber(int $series_number): self
+    public function setId(string $id): self
     {
-        $this->series_number = $series_number;
+        $this->id = $id;
 
         return $this;
     }
@@ -60,7 +61,7 @@ class Series
     {
         if (!$this->sheet->contains($sheet)) {
             $this->sheet[] = $sheet;
-            $sheet->setSeriesNumber($this);
+            $sheet->setGroupNumber($this);
         }
 
         return $this;
@@ -71,8 +72,8 @@ class Series
         if ($this->sheet->contains($sheet)) {
             $this->sheet->removeElement($sheet);
             // set the owning side to null (unless already changed)
-            if ($sheet->getSeriesNumber() === $this) {
-                $sheet->setSeriesNumber(null);
+            if ($sheet->getGroupNumber() === $this) {
+                $sheet->setGroupNumber(null);
             }
         }
 
@@ -91,7 +92,7 @@ class Series
     {
         if (!$this->result->contains($result)) {
             $this->result[] = $result;
-            $result->setSeriesNumber($this);
+            $result->setGroupNumber($this);
         }
 
         return $this;
@@ -102,8 +103,8 @@ class Series
         if ($this->result->contains($result)) {
             $this->result->removeElement($result);
             // set the owning side to null (unless already changed)
-            if ($result->getSeriesNumber() === $this) {
-                $result->setSeriesNumber(null);
+            if ($result->getGroupNumber() === $this) {
+                $result->setGroupNumber(null);
             }
         }
 

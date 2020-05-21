@@ -36,7 +36,7 @@
                     </div>
                     <button
                         v-show="isDropdownOpen"
-                        class="fixed top-0 left-0 bottom-0 right-0 h-full w-full cursor-default"
+                        class="fixed top-0 left-0 bottom-0 right-0 h-full w-full cursor-default outline-none focus:outline-none"
                         @click.prevent="isDropdownOpen = false"
                     ></button>
                     <transition

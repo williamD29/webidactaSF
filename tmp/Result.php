@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\ResultRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\ResultRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
@@ -30,16 +30,22 @@ class Result
     private $answer_number;
 
     /**
-     * @ORM\ManyToOne(targetEntity=GroupNumber::class, inversedBy="result")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity=Series::class, inversedBy="result")
+     * @ORM\JoinColumn(name="series_number", referencedColumnName="series_number", nullable=false)
      */
-    private $groupNumber;
+    private $series_number;
 
     /**
-     * @ORM\ManyToOne(targetEntity=SeriesNumber::class, inversedBy="result")
+     * @ORM\ManyToOne(targetEntity=Group::class, inversedBy="result")
+     * @ORM\JoinColumn(name="group_number", referencedColumnName="group_number", nullable=false)
+     */
+    private $group_number;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Series::class, inversedBy="result")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $seriesNumber;
+    private $series;
 
     public function getId(): ?int
     {
@@ -70,26 +76,38 @@ class Result
         return $this;
     }
 
-    public function getGroupNumber(): ?GroupNumber
+    public function getSeriesNumber(): ?Series
     {
-        return $this->groupNumber;
+        return $this->series_number;
     }
 
-    public function setGroupNumber(?GroupNumber $groupNumber): self
+    public function setSeriesNumber(?Series $series_number): self
     {
-        $this->groupNumber = $groupNumber;
+        $this->series_number = $series_number;
 
         return $this;
     }
 
-    public function getSeriesNumber(): ?SeriesNumber
+    public function getGroupNumber(): ?Group
     {
-        return $this->seriesNumber;
+        return $this->group_number;
     }
 
-    public function setSeriesNumber(?SeriesNumber $seriesNumber): self
+    public function setGroupNumber(?Group $group_number): self
     {
-        $this->seriesNumber = $seriesNumber;
+        $this->group_number = $group_number;
+
+        return $this;
+    }
+
+    public function getSeries(): ?Series
+    {
+        return $this->series;
+    }
+
+    public function setSeries(?Series $series): self
+    {
+        $this->series = $series;
 
         return $this;
     }

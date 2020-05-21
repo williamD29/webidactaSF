@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\AvatarRepository;
-use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\AvatarRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
@@ -27,7 +27,7 @@ class Avatar
     private $url;
 
     /**
-     * @ORM\OneToMany(targetEntity=Student::class, mappedBy="avatar")
+     * @ORM\OneToMany(targetEntity=Student::class, mappedBy="avatar_id")
      */
     private $student;
 
@@ -65,7 +65,7 @@ class Avatar
     {
         if (!$this->student->contains($student)) {
             $this->student[] = $student;
-            $student->setAvatar($this);
+            $student->setAvatarId($this);
         }
 
         return $this;
@@ -76,8 +76,8 @@ class Avatar
         if ($this->student->contains($student)) {
             $this->student->removeElement($student);
             // set the owning side to null (unless already changed)
-            if ($student->getAvatar() === $this) {
-                $student->setAvatar(null);
+            if ($student->getAvatarId() === $this) {
+                $student->setAvatarId(null);
             }
         }
 

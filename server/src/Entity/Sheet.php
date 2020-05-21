@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SheetRepository;
-use Doctrine\ORM\Mapping\EntityListeners;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -12,7 +11,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=SheetRepository::class)
- * @ORM\EntityListeners({"App\Doctrine\SheetSetOwnerListener"})
  */
 class Sheet
 {
@@ -34,37 +32,37 @@ class Sheet
     private $global_question;
 
     /**
+     * @ORM\ManyToOne(targetEntity=GroupNumber::class, inversedBy="sheet")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $groupNumber;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=SeriesNumber::class, inversedBy="sheet")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $seriesNumber;
+
+    /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="sheet")
-     * @ORM\JoinColumn(name="user_id", nullable=false)
+     * @ORM\JoinColumn(nullable=false)
      */
     private $user_id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Series::class, inversedBy="sheet")
-     * @ORM\JoinColumn(name="series_number", referencedColumnName="series_number", nullable=false)
+     * @ORM\ManyToMany(targetEntity=Student::class, mappedBy="sheets")
      */
-    private $series_number;
+    private $students;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Group::class, inversedBy="sheet")
-     * @ORM\JoinColumn(name="group_number", referencedColumnName="group_number", nullable=false)
-     */
-    private $group_number;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Question::class, mappedBy="sheet_id")
+     * @ORM\OneToMany(targetEntity=Question::class, mappedBy="sheet")
      */
     private $question;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Student::class, inversedBy="sheets")
-     */
-    private $student;
-
     public function __construct()
     {
+        $this->students = new ArrayCollection();
         $this->question = new ArrayCollection();
-        $this->student = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -96,6 +94,30 @@ class Sheet
         return $this;
     }
 
+    public function getGroupNumber(): ?GroupNumber
+    {
+        return $this->groupNumber;
+    }
+
+    public function setGroupNumber(?GroupNumber $groupNumber): self
+    {
+        $this->groupNumber = $groupNumber;
+
+        return $this;
+    }
+
+    public function getSeriesNumber(): ?SeriesNumber
+    {
+        return $this->seriesNumber;
+    }
+
+    public function setSeriesNumber(?SeriesNumber $seriesNumber): self
+    {
+        $this->seriesNumber = $seriesNumber;
+
+        return $this;
+    }
+
     public function getUserId(): ?User
     {
         return $this->user_id;
@@ -108,26 +130,30 @@ class Sheet
         return $this;
     }
 
-    public function getSeriesNumber(): ?Series
+    /**
+     * @return Collection|Student[]
+     */
+    public function getStudents(): Collection
     {
-        return $this->series_number;
+        return $this->students;
     }
 
-    public function setSeriesNumber(?Series $series_number): self
+    public function addStudent(Student $student): self
     {
-        $this->series_number = $series_number;
+        if (!$this->students->contains($student)) {
+            $this->students[] = $student;
+            $student->addSheet($this);
+        }
 
         return $this;
     }
 
-    public function getGroupNumber(): ?Group
+    public function removeStudent(Student $student): self
     {
-        return $this->group_number;
-    }
-
-    public function setGroupNumber(?Group $group_number): self
-    {
-        $this->group_number = $group_number;
+        if ($this->students->contains($student)) {
+            $this->students->removeElement($student);
+            $student->removeSheet($this);
+        }
 
         return $this;
     }
@@ -144,7 +170,7 @@ class Sheet
     {
         if (!$this->question->contains($question)) {
             $this->question[] = $question;
-            $question->setSheetId($this);
+            $question->setSheet($this);
         }
 
         return $this;
@@ -155,35 +181,9 @@ class Sheet
         if ($this->question->contains($question)) {
             $this->question->removeElement($question);
             // set the owning side to null (unless already changed)
-            if ($question->getSheetId() === $this) {
-                $question->setSheetId(null);
+            if ($question->getSheet() === $this) {
+                $question->setSheet(null);
             }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Student[]
-     */
-    public function getStudent(): Collection
-    {
-        return $this->student;
-    }
-
-    public function addStudent(Student $student): self
-    {
-        if (!$this->student->contains($student)) {
-            $this->student[] = $student;
-        }
-
-        return $this;
-    }
-
-    public function removeStudent(Student $student): self
-    {
-        if ($this->student->contains($student)) {
-            $this->student->removeElement($student);
         }
 
         return $this;
