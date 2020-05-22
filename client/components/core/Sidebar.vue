@@ -21,16 +21,9 @@
                 class="w-64 bg-white h-screen lg:relative lg:flex fixed top-0 border-r border-cool-gray-200 px-2 flex flex-col z-20"
             >
                 <div class="flex justify-between -mx-2 pl-2">
-                    <nuxt-link
-                        to
-                        class="flex h-16 items-center px-2 text-2xl font-bold"
-                    >
+                    <nuxt-link to class="flex h-16 items-center px-2 text-2xl font-bold">
                         <div class="flex">
-                            <img
-                                src="@/assets/images/webidacta-logo.svg"
-                                class="h-9 w-9 mr-3"
-                                alt
-                            />
+                            <img src="@/assets/images/webidacta-logo.svg" class="h-9 w-9 mr-3" alt />
                             <h2>Webidacta</h2>
                         </div>
                     </nuxt-link>
@@ -48,42 +41,21 @@
                             to
                             class="flex items-center font-medium p-2 rounded-md hover:bg-cool-gray-100 text-cool-gray-500 hover:text-cool-gray-800 focus:outline-none focus:shadow-outline-purple transition duration-150 ease-in-out"
                         >
-                            <i
-                                data-feather="home"
-                                height="20"
-                                width="20"
-                                class="mr-3"
-                            ></i
-                            >Accueil
+                            <i data-feather="home" height="20" width="20" class="mr-3"></i>Accueil
                         </nuxt-link>
                         <nuxt-link
                             to
                             class="flex items-center font-medium p-2 rounded-md hover:bg-cool-gray-100 text-cool-gray-500 hover:text-cool-gray-800 focus:outline-none focus:shadow-outline-purple transition duration-150 ease-in-out"
                         >
-                            <i
-                                data-feather="folder"
-                                height="20"
-                                width="20"
-                                class="mr-3"
-                            ></i
-                            >Gestionnaire
+                            <i data-feather="folder" height="20" width="20" class="mr-3"></i>Gestionnaire
                         </nuxt-link>
                         <nuxt-link
                             to
                             class="flex items-center font-medium p-2 rounded-md hover:bg-cool-gray-100 text-cool-gray-500 hover:text-cool-gray-800 focus:outline-none focus:shadow-outline-purple transition duration-150 ease-in-out"
                         >
-                            <i
-                                data-feather="file"
-                                height="20"
-                                width="20"
-                                class="mr-3"
-                            ></i
-                            >Fiches
+                            <i data-feather="file" height="20" width="20" class="mr-3"></i>Fiches
                         </nuxt-link>
-                        <div
-                            :class="[isLinkOpen ? 'bg-cool-gray-100' : '']"
-                            class="rounded-md"
-                        >
+                        <div :class="[isLinkOpen ? 'bg-cool-gray-100' : '']" class="rounded-md">
                             <button
                                 :class="[
                                     isLinkOpen ? 'text-cool-gray-800' : ''
@@ -91,15 +63,8 @@
                                 class="relative z-20 flex items-center font-medium p-2 rounded-md hover:bg-cool-gray-100 w-full text-cool-gray-500 hover:text-cool-gray-800 focus:outline-none focus:shadow-outline-purple transition duration-150 ease-in-out"
                                 @click.prevent="isLinkOpen = !isLinkOpen"
                             >
-                                <i
-                                    data-feather="user"
-                                    height="20"
-                                    width="20"
-                                    class="mr-3"
-                                ></i>
-                                <div
-                                    class="flex justify-between items-center w-full"
-                                >
+                                <i data-feather="user" height="20" width="20" class="mr-3"></i>
+                                <div class="flex justify-between items-center w-full">
                                     Utilisateurs
                                     <i
                                         data-feather="chevron-down"
@@ -126,19 +91,15 @@
                                     v-show="isLinkOpen"
                                     class="text-sm font-medium relative overflow-hidden transition-all duration-300"
                                 >
-                                    <div
-                                        class="p-2 flex flex-col bg-cool-gray-100 relative z-10"
-                                    >
+                                    <div class="p-2 flex flex-col bg-cool-gray-100 relative z-10">
                                         <nuxt-link
                                             to
                                             class="my-1 p-2 pl-8 text-cool-gray-500 hover:text-cool-gray-800 hover:bg-cool-gray-200 rounded-md focus:outline-none focus:shadow-outline-purple"
-                                            >Créer un élève</nuxt-link
-                                        >
+                                        >Créer un élève</nuxt-link>
                                         <nuxt-link
                                             to
                                             class="my-1 p-2 pl-8 text-cool-gray-500 hover:text-cool-gray-800 hover:bg-cool-gray-200 rounded-md focus:outline-none focus:shadow-outline-purple"
-                                            >Créer un professeur</nuxt-link
-                                        >
+                                        >Créer un professeur</nuxt-link>
                                     </div>
                                 </div>
                             </transition>
@@ -147,9 +108,7 @@
                     <div
                         class="mb-4 space-y-2 text-cool-gray-500 font-medium flex flex-col px-2 text-sm"
                     >
-                        <label class="uppercase text-cool-gray-400"
-                            >Général</label
-                        >
+                        <label class="uppercase text-cool-gray-400">Général</label>
                         <nuxt-link to>À propos</nuxt-link>
                         <nuxt-link to>Aide</nuxt-link>
                         <nuxt-link to>Conditions d'utilisations</nuxt-link>
@@ -162,53 +121,53 @@
 
 <script>
 export default {
-    data() {
-        return {
-            isLinkOpen: false,
-            isSidebarOpen: true
-        }
-    },
-    mounted() {
-        if (window.innerWidth >= 1024) {
-            this.isSidebarOpen = true
-        } else {
-            this.isSidebarOpen = false
-        }
-        window.addEventListener('resize', () => {
-            this.handleResize()
-        })
-    },
-    updated() {
-        window.addEventListener('resize', () => {
-            this.handleResize()
-        })
-    },
-    beforeDestroy() {
-        window.removeEventListener('resize', () => {
-            this.handleResize()
-        })
-    },
-    methods: {
-        handleResize() {
-            if (window.innerWidth >= 1024) {
-                this.isSidebarOpen = true
-            } else {
-                this.isSidebarOpen = false
-            }
-        },
-        beforeEnter(el) {
-            el.style.height = '0'
-        },
-        enter(el) {
-            el.style.height = el.scrollHeight + 'px'
-        },
-        beforeLeave(el) {
-            el.style.height = el.scrollHeight + 'px'
-        },
-        leave(el) {
-            el.style.height = '0'
-        }
-    }
+	data() {
+		return {
+			isLinkOpen: false,
+			isSidebarOpen: true
+		}
+	},
+	mounted() {
+		if (window.innerWidth >= 1024) {
+			this.isSidebarOpen = true
+		} else {
+			this.isSidebarOpen = false
+		}
+		window.addEventListener('resize', () => {
+			this.handleResize()
+		})
+	},
+	updated() {
+		window.addEventListener('resize', () => {
+			this.handleResize()
+		})
+	},
+	beforeDestroy() {
+		window.removeEventListener('resize', () => {
+			this.handleResize()
+		})
+	},
+	methods: {
+		handleResize() {
+			if (window.innerWidth >= 1024) {
+				this.isSidebarOpen = true
+			} else {
+				this.isSidebarOpen = false
+			}
+		},
+		beforeEnter(el) {
+			el.style.height = '0'
+		},
+		enter(el) {
+			el.style.height = el.scrollHeight + 'px'
+		},
+		beforeLeave(el) {
+			el.style.height = el.scrollHeight + 'px'
+		},
+		leave(el) {
+			el.style.height = '0'
+		}
+	}
 }
 </script>
 

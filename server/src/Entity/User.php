@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Validator\IsValidUser;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
@@ -9,11 +10,13 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ApiResource(
@@ -24,16 +27,20 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     itemOperations={
  *         "delete",
  *         "get",
- *         "put"={"validation_groups"={"Default", "putValidation"}},
- *         "patch"={"validation_groups"={"Default", "patchValidation"}}
+ *         "put"={
+ *             "validation_groups"={"Default", "putValidation"}
+ *         },
+ *         "patch"={
+ *             "validation_groups"={"Default", "patchValidation"}
+ *         }
  *     },
- *     normalizationContext={"groups"={"user:read", "admin:read"}},
- *     denormalizationContext={"groups"={"user:write", "admin:write"}},
+ *     normalizationContext={"groups"={"user:read"}},
+ *     denormalizationContext={"groups"={"user:write"}},
  *     attributes={
  *         "pagination_items_per_page"=1
  *     }
  * )
- * @UniqueEntity("email", message="Un compte associé à cette adresse email existe déjà", groups={"postValidation", "putValidation"})
+ * @UniqueEntity("email", message="Un compte associé à cette adresse email existe déjà", groups={"postValidation", "putValidation", "patchValidation"})
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\Table(name="`user`")
  * @ApiFilter(SearchFilter::class, properties={"firstname": "ipartial", "lastname": "ipartial", "email": "ipartial"})
@@ -46,14 +53,57 @@ class User implements UserInterface
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      * @Groups({"admin:read"})
+     * @IsValidUser()
      */
     private $id;
 
     /**
+     * @Assert\Email(message="L'adresse email n'est pas valide", mode="html5", normalizer="trim", groups={"postValidation", "putValidation", "patchValidation"})
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 255,
+     *      minMessage = "L'adresse email doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "L'adresse email doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation", "patchValidation"}
+     * )
+     * @Assert\NotBlank(message="L'adresse email est requise", groups={"postValidation", "putValidation"})
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user:read", "user:write"})
      */
     private $email;
+
+    /**
+     * @Assert\Regex(pattern="/^[a-zA-Z\u00C0-\u00FF' -]+$/", message="Le prénom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation", "patchValidation"})
+     * @Assert\Length(
+     *      min = 2,
+     *      max = 40,
+     *      minMessage = "Le prénom doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le prénom doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation", "patchValidation"}
+     * )
+     * @Assert\NotBlank(message="Le prénom est requis", groups={"postValidation", "putValidation"})
+     * @ORM\Column(type="string", length=40)
+     * @Groups({"user:read", "user:write"})
+     */
+    private $firstname;
+
+    /**
+     * @Assert\Regex(pattern="/^[a-zA-Z\u00C0-\u00FF' -]+$/", message="Le nom contient un ou plusieurs caractères non valides", normalizer="trim", groups={"postValidation", "putValidation", "patchValidation"})
+     * @Assert\Length(
+     *      min = 2,
+     *      max = 40,
+     *      minMessage = "Le nom doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le nom doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation", "patchValidation"}
+     * )
+     * @Assert\NotBlank(message="Le nom est requis", groups={"postValidation", "putValidation"})
+     * @ORM\Column(type="string", length=40)
+     * @Groups({"user:read", "user:write"})
+     */
+    private $lastname;
 
     /**
      * @ORM\Column(type="json")
@@ -68,6 +118,15 @@ class User implements UserInterface
     private $password;
 
     /**
+     * @Assert\Length(
+     *      min = 8,
+     *      max = 60,
+     *      minMessage = "Le mot de passe doit contenir au minimum {{ limit }} caractères",
+     *      maxMessage = "Le mot de passe doit contenir au maximum {{ limit }} caractères",
+     *      allowEmptyString = false,
+     *      groups={"postValidation", "putValidation", "patchValidation"}
+     * )
+     * @Assert\NotBlank(message="Le mot de passe requis", groups={"postValidation", "putValidation"})
      * @SerializedName("password")
      * @Groups({"user:write"})
      */
@@ -77,7 +136,7 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"user:read", "user:write"})
      */
-    private $profile_picture;
+    private $profilePicture;
 
     /**
      * @ORM\OneToMany(targetEntity=Student::class, mappedBy="user_id")
@@ -138,6 +197,18 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getProfilePicture(): ?string
+    {
+        return (string) $this->profilePicture;
+    }
+
+    public function setProfilePicture(string $profilePicture): self
+    {
+        $this->profilePicture = $profilePicture;
+
+        return $this;
+    }
+
     /**
      * A visual identifier that represents this user.
      *
@@ -194,8 +265,6 @@ class User implements UserInterface
         return $this;
     }
 
-
-
     /**
      * @see UserInterface
      */
@@ -211,18 +280,6 @@ class User implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         $this->plainPassword = null;
-    }
-
-    public function getProfilePicture(): ?string
-    {
-        return $this->profile_picture;
-    }
-
-    public function setProfilePicture(string $profile_picture): self
-    {
-        $this->profile_picture = $profile_picture;
-
-        return $this;
     }
 
     /**

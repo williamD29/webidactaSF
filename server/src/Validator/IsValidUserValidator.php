@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class IsValidOwnerValidator extends ConstraintValidator
+class IsValidUserValidator extends ConstraintValidator
 {
 
     public function __construct(Security $security)
@@ -33,11 +33,7 @@ class IsValidOwnerValidator extends ConstraintValidator
             return;
         }
 
-        if(!$value instanceof User) {
-            throw new \InvalidArgumentException('@IsValidOwner constraint must be put on a property containing a User object');
-        }
-
-        if($value !== $user) {
+        if($value !== $user->getId()) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
         }
